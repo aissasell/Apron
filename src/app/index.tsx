@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   },
   liveClock: {
     fontSize: 36,
+    lineHeight: 30,
     fontWeight: 'bold',
     marginTop: Spacing.one,
   },
@@ -255,11 +256,13 @@ const styles = StyleSheet.create({
   },
   timerValue: {
     fontSize: 54,
+    lineHeight: 45,
     fontWeight: 'bold',
     fontVariant: ['tabular-nums'],
   },
   timerValuePlaceholder: {
     fontSize: 54,
+    lineHeight: 45,
     fontWeight: 'bold',
     opacity: 0.25,
     fontVariant: ['tabular-nums'],
