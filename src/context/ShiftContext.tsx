@@ -8,6 +8,7 @@ export interface Shift {
   endTime: string;   // ISO String
   durationHours: number;
   isManual: boolean;
+  tips?: number;
 }
 
 interface ShiftContextType {
@@ -15,9 +16,10 @@ interface ShiftContextType {
   currentShiftStartTime: string | null;
   isLoading: boolean;
   clockIn: () => Promise<void>;
-  clockOut: () => Promise<void>;
-  addManualShift: (startTime: string, endTime: string) => Promise<boolean>;
-  addManualShifts: (shiftsData: {startTime: string, endTime: string}[]) => Promise<boolean>;
+  clockOut: (tips?: number) => Promise<void>;
+  addManualShift: (startTime: string, endTime: string, tips?: number) => Promise<boolean>;
+  addManualShifts: (shiftsData: {startTime: string, endTime: string, tips?: number}[]) => Promise<boolean>;
+  updateShift: (id: string, updatedData: Partial<Shift>) => Promise<boolean>;
   deleteShift: (id: string) => Promise<void>;
   clearAllShifts: () => Promise<void>;
 }
@@ -78,7 +80,7 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Clock Out
-  const clockOut = async () => {
+  const clockOut = async (tips: number = 0) => {
     if (!currentShiftStartTime) return;
     try {
       const now = new Date().toISOString();
@@ -90,6 +92,7 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         endTime: now,
         durationHours: duration,
         isManual: false,
+        tips,
       };
 
       const updatedShifts = [newShift, ...shifts];
@@ -103,14 +106,14 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Add Manual Shift
-  const addManualShift = async (startTime: string, endTime: string): Promise<boolean> => {
-    return addManualShifts([{ startTime, endTime }]);
+  const addManualShift = async (startTime: string, endTime: string, tips: number = 0): Promise<boolean> => {
+    return addManualShifts([{ startTime, endTime, tips }]);
   };
 
   // Add Multiple Manual Shifts
-  const addManualShifts = async (shiftsData: {startTime: string, endTime: string}[]): Promise<boolean> => {
+  const addManualShifts = async (shiftsData: {startTime: string, endTime: string, tips?: number}[]): Promise<boolean> => {
     try {
-      const newShifts = shiftsData.map(({startTime, endTime}) => {
+      const newShifts = shiftsData.map(({startTime, endTime, tips}) => {
         const duration = calculateDurationHours(startTime, endTime);
         if (duration <= 0) return null;
 
@@ -120,6 +123,7 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           endTime,
           durationHours: duration,
           isManual: true,
+          tips: tips || 0,
         };
       }).filter(Boolean) as Shift[];
 
@@ -132,6 +136,41 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return true;
     } catch (error) {
       console.error('Failed to add manual shifts', error);
+      return false;
+    }
+  };
+
+  // Update Shift
+  const updateShift = async (id: string, updatedData: Partial<Shift>): Promise<boolean> => {
+    try {
+      let isUpdated = false;
+      const updatedShifts = shifts.map(shift => {
+        if (shift.id === id) {
+          isUpdated = true;
+          let durationHours = shift.durationHours;
+          if (updatedData.startTime || updatedData.endTime) {
+            durationHours = calculateDurationHours(
+              updatedData.startTime || shift.startTime,
+              updatedData.endTime || shift.endTime
+            );
+          }
+          return {
+            ...shift,
+            ...updatedData,
+            durationHours
+          };
+        }
+        return shift;
+      });
+
+      if (isUpdated) {
+        updatedShifts.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+        await saveShifts(updatedShifts);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to update shift', error);
       return false;
     }
   };
@@ -168,6 +207,7 @@ export const ShiftProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         clockOut,
         addManualShift,
         addManualShifts,
+        updateShift,
         deleteShift,
         clearAllShifts,
       }}>

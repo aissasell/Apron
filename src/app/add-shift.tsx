@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Pressable, View, Platform, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Pressable, View, Platform, Alert, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
@@ -29,11 +29,12 @@ export default function AddShiftScreen() {
       id: Math.random().toString(36).substring(2, 9),
       startTime: tStart,
       endTime: tEnd,
+      tips: '',
     };
   }
 
   // We manage an array of shifts
-  const [segments, setSegments] = useState<{ id: string; startTime: Date; endTime: Date }[]>([
+  const [segments, setSegments] = useState<{ id: string; startTime: Date; endTime: Date; tips?: string }[]>([
     createDefaultSegment()
   ]);
 
@@ -129,7 +130,8 @@ export default function AddShiftScreen() {
     // Format shifts for context
     const shiftsData = computedSegments.map(seg => ({
       startTime: seg.startDateTime.toISOString(),
-      endTime: seg.endDateTime.toISOString()
+      endTime: seg.endDateTime.toISOString(),
+      tips: parseFloat(seg.tips || '0') || 0
     }));
 
     const success = await addManualShifts(shiftsData);
@@ -239,6 +241,24 @@ export default function AddShiftScreen() {
                   >
                     <ThemedText>{formatTime(seg.endDateTime.toISOString())}</ThemedText>
                   </Pressable>
+                </View>
+              </View>
+
+              {/* Tips Input Row */}
+              <View style={styles.tipsInputRow}>
+                <ThemedText type="small" style={styles.timeColLabel}>TIPS EARNED (OPTIONAL)</ThemedText>
+                <View style={styles.tipInputContainer}>
+                  <ThemedText style={styles.currencySymbol}>$</ThemedText>
+                  <TextInput
+                    style={[styles.tipInput, { color: theme.text }]}
+                    value={seg.tips}
+                    onChangeText={(text) => {
+                      setSegments(prev => prev.map(s => s.id === seg.id ? { ...s, tips: text } : s));
+                    }}
+                    keyboardType="decimal-pad"
+                    placeholder="0.00"
+                    placeholderTextColor={theme.textSecondary}
+                  />
                 </View>
               </View>
 
@@ -440,6 +460,31 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  tipsInputRow: {
+    marginTop: Spacing.two,
+    gap: Spacing.one,
+  },
+  tipInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(128, 128, 128, 0.05)',
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderWidth: 1,
+    borderColor: 'rgba(128, 128, 128, 0.2)',
+  },
+  currencySymbol: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: Spacing.one,
+    opacity: 0.7,
+  },
+  tipInput: {
+    flex: 1,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
