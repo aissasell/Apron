@@ -2,7 +2,7 @@
   "expo": {
     "name": "Apron",
     "slug": "Apron",
-    "version": "1.0.0",
+    "version": "beta1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "apron",
@@ -17,7 +17,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Apron"
+      "package": "com.apron.apron_beta"
     },
     "web": {
       "output": "static",
@@ -40,6 +40,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "56fe3add-a142-4073-903c-bacfcfef90e9"
+      }
     }
   }
 }
