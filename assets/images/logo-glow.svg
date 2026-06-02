@@ -1,0 +1,31 @@
+<svg width="201" height="201" viewBox="0 0 201 201" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="blurLarge" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20" />
+    </filter>
+    <filter id="blurSmall" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" />
+    </filter>
+  </defs>
+  
+  <!-- Outer soft star blur -->
+  <g filter="url(#blurLarge)" fill="#ffffff">
+    <ellipse cx="100.5" cy="100.5" rx="90" ry="30" transform="rotate(0 100.5 100.5)" opacity="0.3" />
+    <ellipse cx="100.5" cy="100.5" rx="90" ry="30" transform="rotate(45 100.5 100.5)" opacity="0.15" />
+    <ellipse cx="100.5" cy="100.5" rx="90" ry="30" transform="rotate(90 100.5 100.5)" opacity="0.3" />
+    <ellipse cx="100.5" cy="100.5" rx="90" ry="30" transform="rotate(135 100.5 100.5)" opacity="0.15" />
+    <circle cx="100.5" cy="100.5" r="50" opacity="0.4" />
+  </g>
+
+  <!-- Inner intense star blur -->
+  <g filter="url(#blurSmall)" fill="#ffffff">
+    <ellipse cx="100.5" cy="100.5" rx="80" ry="15" transform="rotate(0 100.5 100.5)" opacity="0.6" />
+    <ellipse cx="100.5" cy="100.5" rx="80" ry="15" transform="rotate(45 100.5 100.5)" opacity="0.3" />
+    <ellipse cx="100.5" cy="100.5" rx="80" ry="15" transform="rotate(90 100.5 100.5)" opacity="0.6" />
+    <ellipse cx="100.5" cy="100.5" rx="80" ry="15" transform="rotate(135 100.5 100.5)" opacity="0.3" />
+    <circle cx="100.5" cy="100.5" r="30" opacity="0.8" />
+  </g>
+  
+  <!-- Center hotspot -->
+  <circle cx="100.5" cy="100.5" r="15" fill="#ffffff" />
+</svg>

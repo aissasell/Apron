@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Pressable, View, ActivityIndicator, Dimensions } from 'react-native';
+import { StyleSheet, Pressable, View, ActivityIndicator, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShifts } from '@/context/ShiftContext';
 import { ThemedText } from '@/components/themed-text';
@@ -16,6 +16,10 @@ export default function ClockScreen() {
   // States for ticking
   const [currentTime, setCurrentTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState('00:00:00');
+  
+  // States for tips modal
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [tipAmount, setTipAmount] = useState('');
 
   // Update current time & elapsed shift timer
   useEffect(() => {
@@ -55,10 +59,16 @@ export default function ClockScreen() {
 
   const handleClockAction = async () => {
     if (clockedIn) {
-      await clockOut();
+      setShowTipModal(true);
     } else {
       await clockIn();
     }
+  };
+
+  const handleClockOutConfirm = async () => {
+    await clockOut(parseFloat(tipAmount) || 0);
+    setShowTipModal(false);
+    setTipAmount('');
   };
 
   if (isLoading) {
@@ -165,6 +175,52 @@ export default function ClockScreen() {
           </ThemedView>
         </View>
 
+        {/* Tip Modal */}
+        <Modal
+          visible={showTipModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowTipModal(false)}
+        >
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalOverlay}
+          >
+            <ThemedView style={[styles.modalContent, { borderColor: theme.cardBorder }]}>
+              <ThemedText style={styles.modalTitle}>Clocking Out</ThemedText>
+              <ThemedText style={styles.modalSub}>Did you earn any tips this shift?</ThemedText>
+              
+              <View style={styles.tipInputContainer}>
+                <ThemedText style={styles.currencySymbol}>$</ThemedText>
+                <TextInput
+                  style={[styles.tipInput, { color: theme.text }]}
+                  value={tipAmount}
+                  onChangeText={setTipAmount}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  placeholderTextColor={theme.textSecondary}
+                  autoFocus
+                />
+              </View>
+
+              <View style={styles.modalActions}>
+                <Pressable 
+                  style={[styles.modalBtn, styles.modalBtnSecondary]} 
+                  onPress={() => setShowTipModal(false)}
+                >
+                  <ThemedText>Cancel</ThemedText>
+                </Pressable>
+                <Pressable 
+                  style={[styles.modalBtn, { backgroundColor: theme.primary }]} 
+                  onPress={handleClockOutConfirm}
+                >
+                  <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Clock Out</ThemedText>
+                </Pressable>
+              </View>
+            </ThemedView>
+          </KeyboardAvoidingView>
+        </Modal>
+
       </SafeAreaView>
     </ThemedView>
   );
@@ -234,6 +290,7 @@ const styles = StyleSheet.create({
   },
   liveClock: {
     fontSize: 36,
+    lineHeight: 30,
     fontWeight: 'bold',
     marginTop: Spacing.one,
   },
@@ -255,11 +312,13 @@ const styles = StyleSheet.create({
   },
   timerValue: {
     fontSize: 54,
+    lineHeight: 45,
     fontWeight: 'bold',
     fontVariant: ['tabular-nums'],
   },
   timerValuePlaceholder: {
     fontSize: 54,
+    lineHeight: 45,
     fontWeight: 'bold',
     opacity: 0.25,
     fontVariant: ['tabular-nums'],
@@ -322,5 +381,64 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 22,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.four,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    padding: Spacing.four,
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: Spacing.one,
+  },
+  modalSub: {
+    opacity: 0.7,
+    marginBottom: Spacing.four,
+  },
+  tipInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    marginBottom: Spacing.four,
+    width: '100%',
+  },
+  currencySymbol: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: Spacing.one,
+  },
+  tipInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+    width: '100%',
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.two,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnSecondary: {
+    backgroundColor: 'rgba(128, 128, 128, 0.1)',
   },
 });
