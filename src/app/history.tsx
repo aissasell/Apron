@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Pressable, View, Alert, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,21 +9,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatDateShort, formatTime, formatDuration } from '@/utils/dateHelpers';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function HistoryScreen() {
   const { shifts, deleteShift, clearAllShifts, updateShift } = useShifts();
   const theme = useTheme();
-
-  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-
-  // Edit State
-  const [editingShift, setEditingShift] = useState<Shift | null>(null);
-  const [editDate, setEditDate] = useState<Date>(new Date());
-  const [editStartTime, setEditStartTime] = useState<Date>(new Date());
-  const [editEndTime, setEditEndTime] = useState<Date>(new Date());
-  const [editTips, setEditTips] = useState<string>('');
-  const [activePicker, setActivePicker] = useState<'date' | 'start' | 'end' | null>(null);
+  const params = useLocalSearchParams<{ week?: string }>();
 
   // Week Calculation Helpers
   const getWeekStart = (isoString: string) => {
@@ -34,6 +25,28 @@ export default function HistoryScreen() {
     start.setHours(0, 0, 0, 0);
     return start;
   };
+
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(() => {
+    if (params.week === 'current') {
+      return getWeekStart(new Date().toISOString()).toISOString();
+    }
+    return null;
+  });
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (params.week === 'current') {
+      setSelectedWeek(getWeekStart(new Date().toISOString()).toISOString());
+    }
+  }, [params.week]);
+
+  // Edit State
+  const [editingShift, setEditingShift] = useState<Shift | null>(null);
+  const [editDate, setEditDate] = useState<Date>(new Date());
+  const [editStartTime, setEditStartTime] = useState<Date>(new Date());
+  const [editEndTime, setEditEndTime] = useState<Date>(new Date());
+  const [editTips, setEditTips] = useState<string>('');
+  const [activePicker, setActivePicker] = useState<'date' | 'start' | 'end' | null>(null);
 
   const getWeekLabel = (start: Date) => {
     const end = new Date(start);

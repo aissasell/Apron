@@ -8,10 +8,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatTime, getElapsedTimeString, formatDuration } from '@/utils/dateHelpers';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function ClockScreen() {
   const { currentShiftStartTime, clockIn, clockOut, shifts, isLoading } = useShifts();
   const theme = useTheme();
+  const router = useRouter();
   
   // States for ticking
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -161,7 +163,10 @@ export default function ClockScreen() {
         </View>
 
         {/* Weekly Summary Card */}
-        <View style={styles.summarySection}>
+        <Pressable 
+          style={styles.summarySection}
+          onPress={() => router.push({ pathname: '/history', params: { week: 'current' } })}
+        >
           <ThemedView type="backgroundElement" style={[styles.summaryCard, { borderColor: theme.cardBorder }]}>
             <View style={styles.summaryIconWrapper}>
               <Ionicons name="time-outline" size={24} color={theme.primary} />
@@ -173,7 +178,7 @@ export default function ClockScreen() {
               </ThemedText>
             </View>
           </ThemedView>
-        </View>
+        </Pressable>
 
         {/* Tip Modal */}
         <Modal
