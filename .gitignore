@@ -37,7 +37,7 @@ yarn-error.*
 *.tsbuildinfo
 
 # App secrets
-apron-497921-5803b05ff64a.json
+playstore-key.json
 
 example
 
