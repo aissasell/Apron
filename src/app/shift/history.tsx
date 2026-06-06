@@ -234,7 +234,7 @@ export default function HistoryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safeArea}>
         
         {/* Header */}
         <View style={styles.header}>

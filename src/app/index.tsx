@@ -83,7 +83,7 @@ export default function ClockScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safeArea}>
         
         {/* Header */}
         <View style={styles.header}>
@@ -165,7 +165,7 @@ export default function ClockScreen() {
         {/* Weekly Summary Card */}
         <Pressable 
           style={styles.summarySection}
-          onPress={() => router.push({ pathname: '/history', params: { week: 'current' } })}
+          onPress={() => router.push({ pathname: '/shift/history', params: { week: 'current' } })}
         >
           <ThemedView type="backgroundElement" style={[styles.summaryCard, { borderColor: theme.cardBorder }]}>
             <View style={styles.summaryIconWrapper}>
