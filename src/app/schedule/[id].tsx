@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSchedules, ScheduledShift } from '@/context/ScheduleContext';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { formatDateShort, formatTime } from '@/utils/dateHelpers';
+import { formatDateShort, formatTime, hasOverlappingShifts } from '@/utils/dateHelpers';
 
 export default function ScheduleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -95,6 +95,12 @@ export default function ScheduleDetailScreen() {
       startTime: start.toISOString(),
       endTime: end.toISOString()
     };
+
+    const otherShifts = schedule.shifts.filter(s => s.id !== editingShiftId);
+    if (hasOverlappingShifts([...otherShifts, shiftData])) {
+      Alert.alert('Error', 'This shift overlaps with another existing shift.');
+      return;
+    }
 
     if (editingShiftId) {
       await updateShiftInSchedule(schedule.id, editingShiftId, shiftData);

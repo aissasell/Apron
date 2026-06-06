@@ -88,3 +88,23 @@ export function getElapsedTimeString(startIso: string): string {
   const pad = (num: number) => String(num).padStart(2, '0');
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
 }
+
+export function doShiftsOverlap(shiftA: { startTime: string, endTime: string }, shiftB: { startTime: string, endTime: string }): boolean {
+  const startA = new Date(shiftA.startTime).getTime();
+  const endA = new Date(shiftA.endTime).getTime();
+  const startB = new Date(shiftB.startTime).getTime();
+  const endB = new Date(shiftB.endTime).getTime();
+  
+  return startA < endB && startB < endA;
+}
+
+export function hasOverlappingShifts(shifts: { startTime: string, endTime: string }[]): boolean {
+  for (let i = 0; i < shifts.length; i++) {
+    for (let j = i + 1; j < shifts.length; j++) {
+      if (doShiftsOverlap(shifts[i], shifts[j])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

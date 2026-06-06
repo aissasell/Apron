@@ -9,7 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSchedules } from '@/context/ScheduleContext';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { formatDateShort, formatTime } from '@/utils/dateHelpers';
+import { formatDateShort, formatTime, hasOverlappingShifts } from '@/utils/dateHelpers';
 
 const getMondayOfWeek = (date: Date) => {
   const d = new Date(date);
@@ -122,6 +122,11 @@ export default function CreateScheduleScreen() {
         startTime: start.toISOString(),
         endTime: end.toISOString()
       });
+    }
+
+    if (hasOverlappingShifts(formattedShifts)) {
+      Alert.alert('Error', 'Some shifts are overlapping. Please adjust the dates and times.');
+      return;
     }
 
     const newScheduleId = await addSchedule(selectedWeekMonday.toISOString(), formattedShifts);
