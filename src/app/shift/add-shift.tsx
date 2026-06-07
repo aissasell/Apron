@@ -147,7 +147,7 @@ export default function AddShiftScreen() {
               // Reset
               setDate(new Date());
               setSegments([createDefaultSegment()]);
-              router.push('/history');
+              router.push('/shift/history');
             }
           }
         ]
@@ -159,7 +159,7 @@ export default function AddShiftScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safeArea}>
         
         {/* Header */}
         <View style={styles.header}>
