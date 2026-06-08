@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Pressable, View, ActivityIndicator, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Pressable, View, ActivityIndicator, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShifts } from '@/context/ShiftContext';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +9,7 @@ import { formatDate, formatTime, getElapsedTimeString, formatDuration } from '@/
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { MoneyCalculator } from '@/components/money-calculator';
 
 export default function ClockScreen() {
   const { currentShiftStartTime, clockIn, clockOut, shifts, isLoading } = useShifts();
@@ -21,6 +22,7 @@ export default function ClockScreen() {
   
   // States for tips modal
   const [showTipModal, setShowTipModal] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
   const [tipAmount, setTipAmount] = useState('');
 
   // Update current time & elapsed shift timer
@@ -70,6 +72,7 @@ export default function ClockScreen() {
   const handleClockOutConfirm = async () => {
     await clockOut(parseFloat(tipAmount) || 0);
     setShowTipModal(false);
+    setShowCalculator(false);
     setTipAmount('');
   };
 
@@ -191,37 +194,58 @@ export default function ClockScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.modalOverlay}
           >
-            <ThemedView style={[styles.modalContent, { borderColor: theme.cardBorder }]}>
-              <ThemedText style={styles.modalTitle}>Clocking Out</ThemedText>
-              <ThemedText style={styles.modalSub}>Did you earn any tips this shift?</ThemedText>
-              
-              <View style={styles.tipInputContainer}>
-                <ThemedText style={styles.currencySymbol}>$</ThemedText>
-                <TextInput
-                  style={[styles.tipInput, { color: theme.text }]}
-                  value={tipAmount}
-                  onChangeText={setTipAmount}
-                  keyboardType="decimal-pad"
-                  placeholder="0.00"
-                  placeholderTextColor={theme.textSecondary}
-                  autoFocus
-                />
-              </View>
+            <ThemedView style={[styles.modalContent, { borderColor: theme.cardBorder, maxHeight: '80%' }]}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center' }} style={{ width: '100%' }}>
+                <ThemedText style={styles.modalTitle}>Clocking Out</ThemedText>
+                <ThemedText style={styles.modalSub}>Did you earn any tips this shift?</ThemedText>
+                
+                <View style={styles.tipInputContainer}>
+                  <ThemedText style={styles.currencySymbol}>$</ThemedText>
+                  <TextInput
+                    style={[styles.tipInput, { color: theme.text }]}
+                    value={tipAmount}
+                    onChangeText={setTipAmount}
+                    keyboardType="decimal-pad"
+                    placeholder="0.00"
+                    placeholderTextColor={theme.textSecondary}
+                    autoFocus={!showCalculator}
+                  />
+                </View>
 
-              <View style={styles.modalActions}>
                 <Pressable 
-                  style={[styles.modalBtn, styles.modalBtnSecondary]} 
-                  onPress={() => setShowTipModal(false)}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.one, marginBottom: Spacing.four }}
+                  onPress={() => setShowCalculator(!showCalculator)}
                 >
-                  <ThemedText>Cancel</ThemedText>
+                  <Ionicons name="calculator-outline" size={16} color={theme.primary} />
+                  <ThemedText style={{ color: theme.primary, fontWeight: 'bold' }}>
+                    {showCalculator ? 'Hide Calculator' : 'Use Calculator'}
+                  </ThemedText>
                 </Pressable>
-                <Pressable 
-                  style={[styles.modalBtn, { backgroundColor: theme.primary }]} 
-                  onPress={handleClockOutConfirm}
-                >
-                  <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Clock Out</ThemedText>
-                </Pressable>
-              </View>
+
+                {showCalculator && (
+                  <View style={{ width: '100%', marginBottom: Spacing.four }}>
+                    <MoneyCalculator onTotalChange={(val) => setTipAmount(val > 0 ? val.toFixed(2) : '')} />
+                  </View>
+                )}
+
+                <View style={styles.modalActions}>
+                  <Pressable 
+                    style={[styles.modalBtn, styles.modalBtnSecondary]} 
+                    onPress={() => {
+                      setShowTipModal(false);
+                      setShowCalculator(false);
+                    }}
+                  >
+                    <ThemedText>Cancel</ThemedText>
+                  </Pressable>
+                  <Pressable 
+                    style={[styles.modalBtn, { backgroundColor: theme.primary }]} 
+                    onPress={handleClockOutConfirm}
+                  >
+                    <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Clock Out</ThemedText>
+                  </Pressable>
+                </View>
+              </ScrollView>
             </ThemedView>
           </KeyboardAvoidingView>
         </Modal>

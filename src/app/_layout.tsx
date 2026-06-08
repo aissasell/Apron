@@ -135,6 +135,14 @@ function DrawerLayout() {
           }}
         />
         <Drawer.Screen
+          name="calculator"
+          options={{
+            title: 'Calculator',
+            drawerLabel: 'Money Calculator',
+            drawerIcon: ({ color, size }) => <Ionicons name="calculator-outline" size={size} color={color} />,
+          }}
+        />
+        <Drawer.Screen
           name="schedule/create"
           options={{
             drawerItemStyle: { display: 'none' },
